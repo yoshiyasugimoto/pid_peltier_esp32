@@ -1,3 +1,4 @@
+/*Add touch sensor for simple-experiment*/
 /*ペルチェ素子をPID制御で温度を一定に保つためのプロジェクト*/
 
 /*サーミスタの入力ピン*/
@@ -31,8 +32,8 @@ const int resultion = 8; /*分解能*/
 /*PIDパラメータの設定*/
 double kp = 30.00;
 double ki = 0;
-double kd = 0.1;
-double targetTemp = 15.00;
+double kd = 0.15;
+double targetTemp = 40.00;
 unsigned long currentTime, previousTime;
 double elapsedTime;
 double error;
@@ -40,6 +41,12 @@ double lastError;
 double cumError, rateError;
 double pwmOut;
 int pwm = 0;
+
+/*esp32内部のタッチセンサを利用するための設定*/
+const int touchPin = T0;
+const int threshold = 14;
+int touchValue;
+
 
 
 
@@ -58,7 +65,7 @@ void loop() {
   /*温度計測*/
   temp_1 = temp_calc(TEMP_1_VOLT);
 
-  Serial.print("温度");
+  Serial.print("temp;");
   Serial.print(temp_1);
   /*PWM制御*/
   pwmOut = biologicalTempControl(temp_1);
@@ -74,6 +81,17 @@ void loop() {
   else {
     ledcWrite(pwmChannel_1, abs(pwmOut));
     ledcWrite(pwmChannel_2, 0);
+  }
+
+  /*タッチセンサ*/
+  touchValue = touchRead(touchPin);
+  Serial.print("touch value;");
+  Serial.print(touchValue);
+  if( touchValue < threshold){
+    Serial.println("true");
+  }
+  else{
+    Serial.println("false");
   }
 }
 
